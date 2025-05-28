@@ -1,0 +1,31 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Cache de dependências e arquivos de build
+node_modules/
+dist/
+build/
+.npm/
+
+# Arquivos de ambiente (se você usar .env para guardar senhas, chaves de API, etc.)
+.env
+.env*.local
+.env.*.local
+
+# Arquivos específicos do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos específicos de IDEs
+.vscode/            # Opcional: alguns preferem commitar .vscode/settings.json se for útil para o time
+.idea/
+
+# Arquivos temporários
+*.swp
+*~
