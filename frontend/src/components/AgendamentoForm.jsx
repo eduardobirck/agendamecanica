@@ -1,41 +1,41 @@
-import React, { useState } from 'react'; // Importamos useState para gerenciar o estado do formulário
+import React, { useState, useEffect } from 'react';
 
-function AgendamentoForm() {
-  // Estados para cada campo do formulário
+
+function AgendamentoForm({ onSave, agendamentoParaEditar, onCancelEdit }) {
   const [data, setData] = useState('');
   const [hora, setHora] = useState('');
   const [nomeCliente, setNomeCliente] = useState('');
   const [servico, setServico] = useState('');
   const [veiculo, setVeiculo] = useState('');
+  const [placa, setPlaca] = useState('');
   const [telefone, setTelefone] = useState('');
 
-  // Função para lidar com o envio do formulário
-  const handleSubmit = (event) => {
-    event.preventDefault(); // Impede o recarregamento da página padrão do formulário
-    const agendamento = {
-      data,
-      hora,
-      nomeCliente,
-      servico,
-      veiculo,
-      telefone,
-    };
-    console.log('Dados do Agendamento:', agendamento);
-    // Aqui, no futuro, enviaremos 'agendamento' para o backend
-    // Por enquanto, apenas exibimos no console.
+  useEffect(() => {
+    if (agendamentoParaEditar) {
+      const dataFormatada = new Date(agendamentoParaEditar.data).toISOString().split('T')[0];
+      
+      setData(dataFormatada);
+      setHora(agendamentoParaEditar.hora);
+      setNomeCliente(agendamentoParaEditar.nomeCliente);
+      setServico(agendamentoParaEditar.servico);
+      setVeiculo(agendamentoParaEditar.veiculo);
+      setPlaca(agendamentoParaEditar.placa);
+      setTelefone(agendamentoParaEditar.telefone);
+    } else {
+      // Se não, limpamos o formulário (modo de criação)
+      setData(''); setHora(''); setNomeCliente(''); setServico('');
+      setVeiculo(''); setPlaca(''); setTelefone('');
+    }
+  }, [agendamentoParaEditar]); // Este efeito roda sempre que 'agendamentoParaEditar' mudar
 
-    // Limpar campos após o envio (opcional)
-    setData('');
-    setHora('');
-    setNomeCliente('');
-    setServico('');
-    setVeiculo('');
-    setTelefone('');
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    onSave({ data, hora, nomeCliente, servico, veiculo, placa, telefone });
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Novo Agendamento</h2>
+      <h2>{agendamentoParaEditar ? 'Editar Agendamento' : 'Novo Agendamento'}</h2>
       <div>
         <label htmlFor="data">Data:</label>
         <input
@@ -55,7 +55,7 @@ function AgendamentoForm() {
           onChange={(e) => setHora(e.target.value)}
           required
         />
-        {/* Poderíamos adicionar step="3600" para pular de hora em hora se o input type="time" suportar bem */}
+        
       </div>
       <div>
         <label htmlFor="nomeCliente">Nome do Cliente:</label>
@@ -87,6 +87,16 @@ function AgendamentoForm() {
         />
       </div>
       <div>
+            <label htmlFor="placa">Placa do Veículo:</label>
+            <input
+              type="text"
+              id="placa"
+              value={placa}
+              onChange={(e) => setPlaca(e.target.value)}
+              required
+            />
+      </div>
+      <div>
         <label htmlFor="telefone">Telefone:</label>
         <input
           type="tel"
@@ -95,7 +105,10 @@ function AgendamentoForm() {
           onChange={(e) => setTelefone(e.target.value)}
         />
       </div>
-      <button type="submit">Agendar</button>
+      <button type="submit">{agendamentoParaEditar ? 'Salvar Alterações' : 'Agendar'}</button>
+      {agendamentoParaEditar && (
+        <button type="button" onClick={onCancelEdit}>Cancelar Edição</button>
+      )}
     </form>
   );
 }
