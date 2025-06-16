@@ -8,7 +8,6 @@ import TextField from '@mui/material/TextField';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { Link as MuiLink } from '@mui/material'; // Usamos o Link do MUI para consistência
 
 function RegisterPage() {
   const [name, setName] = useState('');
@@ -22,7 +21,7 @@ function RegisterPage() {
     try {
       await register(name, email, password);
       alert('Registro bem-sucedido! Por favor, faça o login.');
-      navigate('/login'); // Redireciona para a página de login
+      navigate('/login'); 
     } catch (error) {
       alert('Falha no registro.');
     }
@@ -81,7 +80,14 @@ function RegisterPage() {
            />
 
 
-        <button type="submit">Registrar</button>
+        <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Registrar
+          </Button>
         </Box>
       </Box>
     </Container>
