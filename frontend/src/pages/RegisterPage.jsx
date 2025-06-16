@@ -38,7 +38,7 @@ function RegisterPage() {
         }}
       >
         <Typography component="h1" variant="h5">
-          Login
+          Registrar
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
@@ -86,7 +86,7 @@ function RegisterPage() {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Registrar
+           Registrar 
           </Button>
         </Box>
       </Box>
