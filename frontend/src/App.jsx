@@ -8,7 +8,7 @@ import Container from '@mui/material/Container';
 // Importe suas páginas e componentes
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import AgendamentosDashboard from './pages/AgendamentosDashboard'; // Vamos criar este em seguida
+import AgendamentosDashboard from './pages/AgendamentosDashboard';
 
 // Componente para proteger rotas
 function PrivateRoute({ children }) {

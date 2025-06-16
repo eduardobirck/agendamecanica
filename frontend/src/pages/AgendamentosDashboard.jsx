@@ -19,7 +19,6 @@ function AgendamentosDashboard() {
   const [error, setError] = useState(null);
   const [agendamentoEmEdicao, setAgendamentoEmEdicao] = useState(null);
 
-  // Agora que 'api' é estável, podemos removê-lo das dependências do useCallback
   const fetchAgendamentos = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -36,7 +35,7 @@ function AgendamentosDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [token]); // Removemos 'api' daqui
+  }, [token]); 
 
   useEffect(() => {
     if (token) {

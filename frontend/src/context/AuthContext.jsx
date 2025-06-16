@@ -34,25 +34,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Função de Logout
   const logout = () => {
     setToken(null);
     localStorage.removeItem('token');
   };
 
-  // O valor que será compartilhado com todos os componentes filhos
   const value = {
     token,
     login,
     register,
     logout,
-    isAuthenticated: !!token, // Uma forma fácil de verificar se há um token
+    isAuthenticated: !!token, 
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Hook customizado para facilitar o uso do contexto
 export const useAuth = () => {
   return useContext(AuthContext);
 };
