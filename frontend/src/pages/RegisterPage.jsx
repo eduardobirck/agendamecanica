@@ -2,6 +2,14 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 
+// Importações do MUI
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Container from '@mui/material/Container';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import { Link as MuiLink } from '@mui/material'; // Usamos o Link do MUI para consistência
+
 function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -21,16 +29,63 @@ function RegisterPage() {
   };
 
   return (
-    <div>
-      <h2>Registro</h2>
-      <form onSubmit={handleSubmit}>
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome" required />
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha" required />
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h1" variant="h5">
+          Login
+        </Typography>
+
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="name"
+            label="Nome completo"
+            name="nome"
+            autoComplete="name"
+            autoFocus
+            value={name} onChange={(e) => setName(e.target.value)} placeholder="Nome" 
+            />
+
+            <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="E-mail"
+            name="email"
+            autoComplete="email"
+            value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email"
+            />
+
+            <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="password"
+            label="Senha"
+            name="password"
+            autoComplete="current-password"
+            type="password"
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+           />
+
+
         <button type="submit">Registrar</button>
-      </form>
-      <p>Já tem uma conta? <Link to="/login">Faça o login</Link></p>
-    </div>
+        </Box>
+      </Box>
+    </Container>
+     
   );
 }
 

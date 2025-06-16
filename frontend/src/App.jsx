@@ -2,6 +2,9 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 
+import CssBaseline from '@mui/material/CssBaseline'; 
+import Container from '@mui/material/Container'; 
+
 // Importe suas páginas e componentes
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -16,6 +19,8 @@ function PrivateRoute({ children }) {
 function App() {
   return (
     <Router>
+      <CssBaseline /> 
+      <Container maxWidth="lg">
       <div className="App">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -30,6 +35,7 @@ function App() {
           />
         </Routes>
       </div>
+      </Container>
     </Router>
   );
 }

@@ -5,6 +5,7 @@ import AgendamentoForm from '../components/AgendamentoForm';
 import ListaAgendamentos from '../components/ListaAgendamentos';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios'; 
+import Button from '@mui/material/Button';
 
  const api = axios.create({
   baseURL: 'http://localhost:3001/api',
@@ -82,8 +83,13 @@ function AgendamentosDashboard() {
     <div>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem' }}>
         <h1>Agenda da Oficina Mecânica</h1>
-        <button onClick={logout}>Sair</button>
+        
+        <Button variant="contained" color="primary" onClick={logout}>
+          Sair
+        </Button>
+        
       </header>
+
       <main style={{ padding: '1rem' }}>
         <AgendamentoForm 
           onSave={handleSave}
