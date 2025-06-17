@@ -1,8 +1,5 @@
-// Arquivo: frontend/src/components/AgendamentoForm.jsx
-
 import React, { useState, useEffect } from 'react';
 
-// Importações do MUI
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -10,7 +7,6 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 function AgendamentoForm({ onSave, agendamentoParaEditar, onCancelEdit }) {
-  // ... (toda a sua lógica de useState e useEffect continua exatamente a mesma)
   const [data, setData] = useState('');
   const [hora, setHora] = useState('');
   const [nomeCliente, setNomeCliente] = useState('');
@@ -20,7 +16,6 @@ function AgendamentoForm({ onSave, agendamentoParaEditar, onCancelEdit }) {
   const [telefone, setTelefone] = useState('');
 
   useEffect(() => {
-    // ... (lógica para preencher o form no modo de edição, sem mudanças)
   }, [agendamentoParaEditar]);
 
   const handleSubmit = (event) => {

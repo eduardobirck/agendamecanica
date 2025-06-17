@@ -5,7 +5,6 @@ import { useAuth } from './context/AuthContext';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 
-// Importe todas as suas páginas
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AgendamentosDashboard from './pages/AgendamentosDashboard';
@@ -21,9 +20,7 @@ function App() {
   return (
     <Router>
       <CssBaseline />
-      <Header /> {/* O Header agora está aqui fora, no topo */}
-      
-      {/* O Container envolve apenas o conteúdo principal da página */}
+      <Header /> 
       <Container component="main" maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />

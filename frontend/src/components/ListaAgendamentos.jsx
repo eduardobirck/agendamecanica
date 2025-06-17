@@ -1,7 +1,5 @@
-// Arquivo: frontend/src/components/ListaAgendamentos.jsx
 import React from 'react';
 
-// 1. Importações do MUI
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import EditIcon from '@mui/icons-material/Edit';
@@ -9,9 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 function ListaAgendamentos({ agendamentos, loading, error, onEdit, onDelete }) {
 
-  // ... (if loading, if error...)
-
-  return (
+return (
     <div>
       <h2>Agendamentos Confirmados</h2>
       {agendamentos.length === 0 ? (
