@@ -80,15 +80,7 @@ function AgendamentosDashboard() {
 
   return (
     <div>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem' }}>
-        <h1>Agenda da Oficina Mecânica</h1>
-        
-        <Button variant="contained" color="primary" onClick={logout}>
-          Sair
-        </Button>
-        
-      </header>
-
+ 
       <main style={{ padding: '1rem' }}>
         <AgendamentoForm 
           onSave={handleSave}

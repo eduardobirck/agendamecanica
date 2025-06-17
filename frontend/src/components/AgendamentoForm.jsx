@@ -29,7 +29,6 @@ function AgendamentoForm({ onSave, agendamentoParaEditar, onCancelEdit }) {
   };
 
   return (
-    // Usamos o Box do MUI que funciona como uma <div>, mas com mais superpoderes de estilo
     <Box 
       component="form" 
       onSubmit={handleSubmit}
@@ -48,7 +47,6 @@ function AgendamentoForm({ onSave, agendamentoParaEditar, onCancelEdit }) {
       <TextField label="Placa do Veículo" value={placa} onChange={e => setPlaca(e.target.value)} required />
       <TextField label="Telefone" value={telefone} onChange={e => setTelefone(e.target.value)} />
 
-      {/* Usando o Stack para os botões do formulário */}
       <Stack direction="row" spacing={2}>
         <Button type="submit" variant="contained">
           {agendamentoParaEditar ? 'Salvar Alterações' : 'Agendar'}
