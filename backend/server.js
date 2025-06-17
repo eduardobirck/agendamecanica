@@ -91,6 +91,8 @@ app.delete('/api/agendamentos/:id', protect, async (req, res) => {
 
 app.use('/api/auth', require('./routes/auth'));
 
+app.use('/api/oficinas', require('./routes/oficinas'));
+
 app.listen(port, () => {
   console.log(`🚀 Servidor backend rodando em http://localhost:${port}`);
 });
