@@ -4,12 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import AgendamentoForm from '../components/AgendamentoForm';
 import ListaAgendamentos from '../components/ListaAgendamentos';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios'; 
 import Button from '@mui/material/Button';
-
- const api = axios.create({
-  baseURL: 'http://localhost:3001/api',
-});
+import api from '../api/api';
 
 function AgendamentosDashboard() {
   const { logout, token } = useAuth();
@@ -23,11 +19,7 @@ function AgendamentosDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get('/agendamentos', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await api.get('/agendamentos');
       setAgendamentos(response.data);
     } catch (err) {
       setError('Falha ao buscar dados');
@@ -43,14 +35,12 @@ function AgendamentosDashboard() {
     }
   }, [token, fetchAgendamentos]);
 
-  // Função para salvar (criar ou editar)
   const handleSave = async (dadosDoForm) => {
-    const config = { headers: { 'Authorization': `Bearer ${token}` } };
     try {
       if (agendamentoEmEdicao) {
-        await api.put(`/agendamentos/${agendamentoEmEdicao._id}`, dadosDoForm, config);
+        await api.put(`/agendamentos/${agendamentoEmEdicao._id}`, dadosDoForm);
       } else {
-        await api.post('/agendamentos', dadosDoForm, config);
+        await api.post('/agendamentos', dadosDoForm);
       }
       setAgendamentoEmEdicao(null);
       fetchAgendamentos();
@@ -64,9 +54,7 @@ function AgendamentosDashboard() {
   const handleDelete = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar?')) {
       try {
-        await api.delete(`/agendamentos/${id}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        await api.delete(`/agendamentos/${id}`);
         fetchAgendamentos();
       } catch (err) {
         console.error('Erro ao deletar:', err);

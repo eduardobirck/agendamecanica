@@ -35,8 +35,8 @@ function Header() {
             <>
               <Button color="inherit" component={RouterLink} to="/">Agendamentos</Button>
               {user && user.role === 'admin' && (
-                <Button color="inherit" component={RouterLink} to="/cadastrar-mecanica">
-                  Cadastrar Oficina
+                <Button color="inherit" component={RouterLink} to="/oficinas">
+                  Oficinas
                 </Button>
               )}              
               <Button color="inherit" onClick={handleLogout}>Sair</Button>

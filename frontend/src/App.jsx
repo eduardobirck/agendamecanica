@@ -8,7 +8,7 @@ import Container from '@mui/material/Container';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AgendamentosDashboard from './pages/AgendamentosDashboard';
-import OficinaRegisterPage from './pages/OficinaRegisterPage';
+import OficinasListPage from './pages/OficinasListPage';
 
 // Componente PrivateRoute (sem alterações)
 function PrivateRoute({ children }) {
@@ -30,9 +30,9 @@ function App() {
             element={<PrivateRoute><AgendamentosDashboard /></PrivateRoute>} 
           />
           <Route 
-            path="/cadastrar-mecanica" 
-            element={<PrivateRoute><OficinaRegisterPage /></PrivateRoute>} 
-          />
+                path="/oficinas" 
+                element={<PrivateRoute><OficinasListPage /></PrivateRoute>} 
+           />
         </Routes>
       </Container>
     </Router>
