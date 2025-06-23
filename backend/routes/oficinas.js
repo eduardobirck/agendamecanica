@@ -68,4 +68,54 @@ router.get('/', [protect, authorize('admin')], async (req, res) => {
 });
 
 
+// @route   PUT /api/oficinas/:id
+// @desc    Atualizar uma oficina
+// @access  Private (Admin)
+router.put('/:id', [protect, authorize('admin')], async (req, res) => {
+  try {
+    const {nome, cnpj, endereco, telefone} = req.body;
+
+    const camposAtualizados = {nome, cnpj, endereco, telefone};
+
+    const oficina = await Oficina.findByIdAndUpdate(
+      req.params.id,
+      camposAtualizados,
+      {new: true, runValidators: true}
+    );
+
+    if (!oficina) {
+      return res.status(404).json({ msg: 'Oficina não encontrada'});
+    }
+
+    res.json(oficina);
+    
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Erro no servidor');
+  }
+});
+
+
+// @route   DELETE /api/oficinas/:id
+// @desc    Deletar uma oficina
+// @access  Private (Admin)
+router.delete('/:id', [protect, authorize('admin')], async (req, res) => {
+  try {
+    const oficina = await Oficina.findById(req.params.id); 
+
+    if (!oficina) {
+      return res.status(404).json({msg: 'Oficina não encontrada'});
+    }
+
+    await oficina.deleteOne();
+    res.json({msg: 'Oficina removida com sucesso'});
+  } catch (error) {
+    console.error(error.message)
+    res.status(500).send('Erro no servidor');
+  }
+
+  });
+
+
+
 module.exports = router;

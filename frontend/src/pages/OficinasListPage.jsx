@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/api';
 import OficinaForm from '../components/OficinaForm';
 
-import { Box, Card, CardContent, CircularProgress, Typography, Grid, Button, Dialog, DialogTitle, DialogContent } from '@mui/material';
+import { Box, Card, CardContent, CircularProgress, Typography, Grid, Button, Dialog, DialogTitle, DialogContent, CardActions } from '@mui/material';
 
 function OficinasListPage() {
   const { token } = useAuth();
@@ -11,6 +11,7 @@ function OficinasListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const [oficinaEmEdicao, setOficinaEmEdicao] = useState(null);
 
   const fetchOficinas = useCallback(async () => {
     setLoading(true);
@@ -35,19 +36,50 @@ function OficinasListPage() {
     }
   }, [fetchOficinas, token]);
 
-  const handleOpenModal = () => setOpenModal(true);
-  const handleCloseModal = () => setOpenModal(false);
+const handleOpenModalParaCriar = () => {
+    setOficinaEmEdicao(null); 
+    setOpenModal(true);
+  };
+  
+  const handleOpenModalParaEditar = (oficina) => {
+    setOficinaEmEdicao(oficina); 
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setOficinaEmEdicao(null);
+  };
 
   const handleSaveOficina = async (dadosDaOficina) => {
     try {
-      await api.post('/oficinas', dadosDaOficina);
+      if (oficinaEmEdicao) {
+        await api.put(`/oficinas/${oficinaEmEdicao._id}`, dadosDaOficina);
+        alert('Oficina atualizada com sucesso!');
+      } else {
+        await api.post('/oficinas', dadosDaOficina);
+        alert('Oficina salva com sucesso!');
+      }
       handleCloseModal();
       fetchOficinas();
-      alert('Oficina salva com sucesso!');
     } catch (err) {
       console.error("Erro ao salvar oficina:", err);
-      const errorMessage = err.response?.data?.errors?.[0]?.msg || 'Falha ao cadastrar oficina.';
+      const errorMessage = err.response?.data?.errors?.[0]?.msg || 'Falha ao salvar oficina.';
       alert(`Erro: ${errorMessage}`);
+    }
+  };
+
+  const handleDeleteOficina = async (id)=> {
+    console.log(`FUNÇÃO handleDeleteOficina CHAMADA COM O ID: ${id}`);
+    if (window.confirm('Tem certeza que deseja deletar esta oficina?')){
+      try {
+        await api.delete(`/oficinas/${id}`);
+        alert('Oficina deletada com sucesso');
+        fetchOficinas();
+      } catch(err) {
+        console.error("Erro ao deletar a oficina", err);
+        alert('Não foi possível deletar a oficina.');
+      }
     }
   };
 
@@ -57,18 +89,18 @@ function OficinasListPage() {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" component="h1">
-          Gerenciar Oficinas
-        </Typography>
-        <Button variant="contained" onClick={handleOpenModal}>
-          Adicionar Nova Oficina
-        </Button>
+        <Typography variant="h4" component="h1">Gerenciar Oficinas</Typography>
+        <Button variant="contained" onClick={handleOpenModalParaCriar}>Adicionar Nova Oficina</Button>
       </Box>
 
       <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
-        <DialogTitle>Nova Oficina</DialogTitle>
+        <DialogTitle>{oficinaEmEdicao ? 'Editar Oficina' : 'Nova Oficina'}</DialogTitle>
         <DialogContent>
-          <OficinaForm onSave={handleSaveOficina} onCancel={handleCloseModal} />
+          <OficinaForm 
+            onSave={handleSaveOficina} 
+            onCancel={handleCloseModal} 
+            oficinaParaEditar={oficinaEmEdicao} 
+          />
         </DialogContent>
       </Dialog>
       
@@ -76,7 +108,10 @@ function OficinasListPage() {
         <Typography sx={{ mt: 4, textAlign: 'center' }}>Nenhuma oficina cadastrada ainda.</Typography>
       ) : (
         <Grid container spacing={3} sx={{ mt: 2 }}>
-          {oficinas.map((oficina) => (
+          {oficinas.map((oficina) => {
+            console.log(`Renderizando card para "${oficina.nome}" com ID: ${oficina._id}`);
+
+            return (
             <Grid item xs={12} sm={6} md={4} key={oficina._id}>
               <Card sx={{ height: '100%' }}>
                 <CardContent>
@@ -92,9 +127,14 @@ function OficinasListPage() {
                     ) : 'Endereço não cadastrado'}
                   </Typography>
                 </CardContent>
+                <CardActions>
+                  <Button size="small" onClick={() => handleOpenModalParaEditar(oficina)}>Editar</Button>
+                  <Button  size="small" color="error" onClick={() => handleDeleteOficina(oficina._id)} > Deletar </Button>
+                </CardActions>
               </Card>
             </Grid>
-          ))}
+          )
+          })}
         </Grid>
       )}
     </Box>
