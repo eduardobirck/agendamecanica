@@ -116,6 +116,52 @@ router.delete('/:id', [protect, authorize('admin')], async (req, res) => {
 
   });
 
+// @route   GET /api/oficinas
+// @desc    Listar todas as oficinas (para o admin gerenciar)
+// @access  Private (Admin)
+router.get('/', [protect, authorize('admin')], async (req, res) => {
+  try {
+    const oficinas = await Oficina.find().populate('proprietario', 'name email');
+    res.json(oficinas);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Erro no servidor');
+  }
+});
+
+// @route   GET /api/oficinas/public
+// @desc    Listar todas as oficinas para o público/clientes
+// @access  Public
+router.get('/public', async (req, res) => {
+  try {
+    const oficinas = await Oficina.find().select('nome endereco telefone');
+    res.json(oficinas);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Erro no servidor');
+  }
+}); 
+
+// @route   GET /api/oficinas/:id
+// @desc    Buscar os detalhes de uma oficina específica
+// @access  Private (Qualquer usuário logado pode ver)
+router.get('/:id', protect, async (req, res) => {
+  try {
+    const oficina = await Oficina.findById(req.params.id).select('-proprietario'); 
+
+    if (!oficina) {
+      return res.status(404).json({ msg: 'Oficina não encontrada' });
+    }
+    res.json(oficina);
+  } catch (error) {
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+        return res.status(404).json({ msg: 'Oficina não encontrada' });
+    }
+    res.status(500).send('Erro no servidor');
+  }
+});
+
 
 
 module.exports = router;

@@ -36,6 +36,8 @@ export const AuthProvider = ({ children }) => {
 
         const decodedToken = jwtDecode(token);
         setUser(decodedToken.user);
+
+        return decodedToken.user;
       }
     } catch (error) {
       console.error('Falha no login', error);

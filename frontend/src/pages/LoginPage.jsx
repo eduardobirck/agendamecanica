@@ -18,8 +18,13 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login(email, password);
-      navigate('/');
+      const loggedInUser = await login(email, password);
+
+      if (loggedInUser && loggedInUser.role == 'admin'){
+        navigate('/');
+      } else {
+        navigate('/oficinas-disponiveis');
+      }
     } catch (error) {
       alert('Falha no login. Verifique suas credenciais.');
     }
