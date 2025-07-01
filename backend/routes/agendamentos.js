@@ -8,11 +8,11 @@ const Oficina = require('../models/Oficina');
 // @desc    Criar um novo agendamento para uma oficina específica
 // @access  Private (Qualquer usuário logado)
 router.post('/', protect, async (req, res) => {
-  const { data, hora, nomeCliente, servico, veiculo, placa, telefone, oficinaId } = req.body;
+  // Garanta que esta linha esteja exatamente assim, incluindo 'oficina' no final
+  const { data, hora, nomeCliente, servico, veiculo, placa, telefone, oficina } = req.body;
 
   try {
-    // Verifica se a oficina para a qual se está agendando realmente existe
-    const oficinaExiste = await Oficina.findById(oficinaId);
+    const oficinaExiste = await Oficina.findById(oficina);
     if (!oficinaExiste) {
       return res.status(404).json({ msg: 'Oficina não encontrada' });
     }
@@ -22,7 +22,7 @@ router.post('/', protect, async (req, res) => {
     }
 
     const novoAgendamento = new Agendamento({
-      oficina: oficinaId, 
+      oficina, // Forma curta de 'oficina: oficina'
       data,
       hora,
       nomeCliente,
@@ -42,18 +42,27 @@ router.post('/', protect, async (req, res) => {
 });
 
 // @route   GET /api/agendamentos
-// @desc    Listar agendamentos de UMA oficina específica
-// @access  Private (Qualquer usuário logado pode ver a agenda de uma oficina)
+// @desc    Listar agendamentos (para admins ou de uma oficina específica para clientes)
+// @access  Private
 router.get('/', protect, async (req, res) => {
   try {
-    // 1. Pegamos o ID da oficina dos parâmetros da URL (query string)
     const { oficinaId } = req.query;
-
-    if (!oficinaId) {
-      return res.status(400).json({ msg: 'O ID da oficina é obrigatório' });
+    
+    let filtro = {}; 
+    if (req.user.role !== 'admin') {
+      if (!oficinaId) {
+        return res.status(400).json({ msg: 'O ID da oficina é obrigatório para clientes.' });
+      }
+      filtro.oficina = oficinaId;
+    } else {
+      if (oficinaId) {
+        filtro.oficina = oficinaId;
+      }
     }
 
-    const agendamentos = await Agendamento.find({ oficina: oficinaId }).sort({ data: 1, hora: 1 });
+    const agendamentos = await Agendamento.find(filtro)
+      .populate('oficina', 'nome') 
+      .sort({ data: 1, hora: 1 });
 
     res.json(agendamentos);
 
@@ -62,7 +71,6 @@ router.get('/', protect, async (req, res) => {
     res.status(500).send('Erro no servidor');
   }
 });
-
 
 
 module.exports = router;

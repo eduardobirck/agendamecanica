@@ -7,11 +7,9 @@ import { useAuth } from '../context/AuthContext';
 import AgendamentoForm from '../components/AgendamentoForm';
 import ListaAgendamentos from '../components/ListaAgendamentos';
 
-// Componentes do MUI
 import { Box, Typography, CircularProgress, Alert, Button } from '@mui/material';
 
 function WorkshopSchedulePage() {
-  // 1. Pega o ID da oficina da URL
   const { oficinaId } = useParams();
   const navigate = useNavigate();
 
@@ -21,10 +19,8 @@ function WorkshopSchedulePage() {
   const [error, setError] = useState(null);
   const [agendamentoEmEdicao, setAgendamentoEmEdicao] = useState(null);
 
-  // Função para buscar os agendamentos DESTA oficina
   const fetchAgendamentos = useCallback(async () => {
     try {
-      // 2. Passa o oficinaId como parâmetro de consulta na URL
       const response = await api.get(`/agendamentos?oficinaId=${oficinaId}`);
       setAgendamentos(response.data);
     } catch (err) {
@@ -33,16 +29,13 @@ function WorkshopSchedulePage() {
     }
   }, [oficinaId]);
 
-  // useEffect para buscar os dados da oficina e os agendamentos
   useEffect(() => {
     const getInitialData = async () => {
       setLoading(true);
       try {
-        // Busca os detalhes da oficina para mostrar o nome na página
         const oficinaResponse = await api.get(`/oficinas/${oficinaId}`);
         setOficina(oficinaResponse.data);
-        
-        // Em seguida, busca os agendamentos
+
         await fetchAgendamentos();
       } catch (err) {
         setError('Oficina não encontrada ou erro ao carregar dados.');
@@ -54,9 +47,7 @@ function WorkshopSchedulePage() {
     getInitialData();
   }, [oficinaId, fetchAgendamentos]);
 
-  // Função de salvar que agora inclui o ID da oficina
   const handleSave = async (dadosDoForm) => {
-    // 3. Adiciona o ID da oficina aos dados que serão salvos
     const dadosParaSalvar = { ...dadosDoForm, oficina: oficinaId };
 
     try {
