@@ -23,9 +23,21 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
+    enum: ['user', 'admin','owner','funcionario'],
     default: 'user', 
   },
+
+  status: {
+    type: String,
+    enum: ['ativo', 'inativo'],
+    default: 'ativo',
+  },
+
+  oficina: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Oficina',
+    required: false,
+  }
 }, { timestamps: true });
 
 
@@ -38,7 +50,6 @@ UserSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Método para comparar a senha enviada no login com a senha no banco
 UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

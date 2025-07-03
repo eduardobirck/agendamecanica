@@ -66,6 +66,10 @@ router.post(
         return res.status(400).json({ errors: [{ msg: 'Credenciais inválidas' }] });
       }
 
+      if (user.status === 'inativo'){
+        return res.status(403).json({errors: [{msg: 'Este usuário está inativo e não pode fazer login.' }] });
+      }
+
       const isMatch = await user.matchPassword(password);
 
       if (!isMatch) {

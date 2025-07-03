@@ -11,6 +11,7 @@ import AgendamentosDashboard from './pages/AgendamentosDashboard';
 import OficinasListPage from './pages/OficinasListPage';
 import WorkshopSelectionPage from './pages/WorkshopSelectionPage';
 import WorkshopSchedulePage from './pages/WorkshopSchedulePage';
+import UserManagementPage from './pages/UserManagementPage';
 
 // Componente PrivateRoute (sem alterações)
 function PrivateRoute({ children }) {
@@ -43,6 +44,10 @@ function App() {
           <Route
             path="/oficina/:oficinaId"
             element={<PrivateRoute><WorkshopSchedulePage /></PrivateRoute>}
+          />
+          <Route 
+            path="/admin/users" 
+            element={<PrivateRoute><UserManagementPage /></PrivateRoute>} 
           />
         </Routes>
       </Container>

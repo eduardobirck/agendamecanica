@@ -34,11 +34,12 @@ function Header() {
           {isAuthenticated ? (
             <>
               <Button color="inherit" component={RouterLink} to="/">Agendamentos</Button>
-              {user && user.role === 'admin' && (
+              {user && user.role === 'admin' && (<>
                 <Button color="inherit" component={RouterLink} to="/oficinas">
                   Oficinas
                 </Button>
-              )}              
+                <Button color="inherit" component={RouterLink} to="/admin/users">Usuários</Button>
+              </>)}              
               <Button color="inherit" onClick={handleLogout}>Sair</Button>
             </>
           ) : (

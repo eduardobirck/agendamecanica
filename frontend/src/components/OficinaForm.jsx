@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Button, TextField, Grid, Box } from '@mui/material';
+import { Button, TextField, Grid, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
-function OficinaForm({ onSave, onCancel, oficinaParaEditar }) {
+function OficinaForm({ onSave, onCancel, oficinaParaEditar, users = [] }) {
   const [nome, setNome] = useState('');
   const [cnpj, setCnpj] = useState('');
   const [telefone, setTelefone] = useState('');
   const [endereco, setEndereco] = useState({ rua: '', numero: '', cidade: '', estado: '', cep: '' });
+
+  const [proprietarioId, setProprietarioId] = useState('');
 
   useEffect(() => {
     if (oficinaParaEditar) {
@@ -13,11 +15,13 @@ function OficinaForm({ onSave, onCancel, oficinaParaEditar }) {
       setCnpj(oficinaParaEditar.cnpj || '');
       setTelefone(oficinaParaEditar.telefone || '');
       setEndereco(oficinaParaEditar.endereco || { rua: '', numero: '', cidade: '', estado: '', cep: '' });
+      setProprietarioId(oficinaParaEditar.proprietario?._id || '');
     } else {
       setNome('');
       setCnpj('');
       setTelefone('');
       setEndereco({ rua: '', numero: '', cidade: '', estado: '', cep: '' });
+      setProprietarioId('');
     }
   }, [oficinaParaEditar]);
 
@@ -27,7 +31,7 @@ function OficinaForm({ onSave, onCancel, oficinaParaEditar }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({ nome, cnpj, telefone, endereco });
+    onSave({ nome, cnpj, telefone, endereco, proprietario: proprietarioId });
   };
 
   return (
@@ -39,6 +43,23 @@ function OficinaForm({ onSave, onCancel, oficinaParaEditar }) {
         <Grid item xs={12} sm={4}>
           <TextField fullWidth label="CNPJ" value={cnpj} onChange={(e) => setCnpj(e.target.value)} required />
         </Grid>
+         <Grid item xs={12}>
+            <FormControl fullWidth required>
+              <InputLabel id="select-owner-label">Proprietário</InputLabel>
+              <Select
+                labelId="select-owner-label"
+                value={proprietarioId}
+                label="Proprietário"
+                onChange={(e) => setProprietarioId(e.target.value)}
+              >
+                {users.map(user => (
+                  <MenuItem key={user._id} value={user._id}>
+                    {user.name} ({user.email})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
         <Grid item xs={12} sm={6}>
           <TextField fullWidth label="Rua / Avenida" name="rua" value={endereco.rua} onChange={handleEnderecoChange} required />
         </Grid>

@@ -3,26 +3,39 @@ import { useAuth } from '../context/AuthContext';
 import api from '../api/api';
 import OficinaForm from '../components/OficinaForm';
 
-import { Box, Card, CardContent, CircularProgress, Typography, Grid, Button, Dialog, DialogTitle, DialogContent, CardActions } from '@mui/material';
+import { 
+  Box, Card, CardActions, CardContent, CircularProgress, Typography, 
+  Grid, Button, Dialog, DialogTitle, DialogContent, 
+  Select, MenuItem, FormControl, InputLabel, DialogActions
+} from '@mui/material';
 
 function OficinasListPage() {
   const { token } = useAuth();
   const [oficinas, setOficinas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [openModal, setOpenModal] = useState(false);
+
+  const [editCreateModalOpen, setEditCreateModalOpen] = useState(false);
   const [oficinaEmEdicao, setOficinaEmEdicao] = useState(null);
 
-  const fetchOficinas = useCallback(async () => {
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [users, setUsers] = useState([]); 
+  const [selectedUserId, setSelectedUserId] = useState(''); 
+  const [selectedOficina, setSelectedOficina] = useState(null); 
+
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get('/oficinas');
-      console.log('Dados recebidos da API:', response.data);
-      setOficinas(Array.isArray(response.data) ? response.data : []);
+      const [oficinasRes, usersRes] = await Promise.all([
+        api.get('/oficinas'),
+        api.get('/users')
+      ]);
+      setOficinas(oficinasRes.data);
+      setUsers(usersRes.data.filter(user => user.role !== 'admin')); 
     } catch (err) {
-      console.error("Erro ao buscar oficinas:", err);
-      setError("Não foi possível carregar a lista de oficinas.");
+      console.error("Erro ao buscar dados:", err);
+      setError("Não foi possível carregar os dados da página.");
     } finally {
       setLoading(false);
     }
@@ -30,24 +43,20 @@ function OficinasListPage() {
 
   useEffect(() => {
     if (token) {
-      fetchOficinas();
-    } else {
-      setLoading(false); 
+      fetchData();
     }
-  }, [fetchOficinas, token]);
+  }, [token, fetchData]);
 
-const handleOpenModalParaCriar = () => {
+const handleOpenCreateModal = () => {
     setOficinaEmEdicao(null); 
-    setOpenModal(true);
+    setEditCreateModalOpen(true);
   };
-  
-  const handleOpenModalParaEditar = (oficina) => {
+  const handleOpenEditModal = (oficina) => {
     setOficinaEmEdicao(oficina); 
-    setOpenModal(true);
+    setEditCreateModalOpen(true);
   };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
+  const handleCloseCreateEditModal = () => {
+    setEditCreateModalOpen(false);
     setOficinaEmEdicao(null);
   };
 
@@ -83,6 +92,32 @@ const handleOpenModalParaCriar = () => {
     }
   };
 
+  const handleOpenAssignModal = (oficina) => {
+    setSelectedOficina(oficina);
+    setSelectedUserId(oficina.proprietario?._id || ''); 
+    setAssignModalOpen(true);
+  };
+  const handleCloseAssignModal = () => {
+    setAssignModalOpen(false);
+    setSelectedOficina(null);
+    setSelectedUserId('');
+  };
+  const handleAssignOwner = async () => {
+    if (!selectedUserId || !selectedOficina) {
+      alert("Por favor, selecione um usuário.");
+      return;
+    }
+    try {
+      await api.put(`/users/${selectedUserId}/assign-workshop`, { oficinaId: selectedOficina._id });
+      handleCloseAssignModal();
+      fetchData(); 
+      alert('Dono vinculado com sucesso!');
+    } catch (err) {
+      console.error("Erro ao vincular dono:", err);
+      alert('Erro ao vincular dono.');
+    }
+  };
+
   if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
   if (error) return <Typography color="error" align="center">{error}</Typography>;
 
@@ -90,51 +125,68 @@ const handleOpenModalParaCriar = () => {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4" component="h1">Gerenciar Oficinas</Typography>
-        <Button variant="contained" onClick={handleOpenModalParaCriar}>Adicionar Nova Oficina</Button>
+        <Button variant="contained" onClick={handleOpenCreateModal}>Adicionar Nova Oficina</Button>
       </Box>
 
-      <Dialog open={openModal} onClose={handleCloseModal} maxWidth="md" fullWidth>
+      {/* Modal de Criar/Editar Oficina */}
+      <Dialog open={editCreateModalOpen} onClose={handleCloseCreateEditModal} maxWidth="md" fullWidth>
         <DialogTitle>{oficinaEmEdicao ? 'Editar Oficina' : 'Nova Oficina'}</DialogTitle>
         <DialogContent>
           <OficinaForm 
             onSave={handleSaveOficina} 
-            onCancel={handleCloseModal} 
+            onCancel={handleCloseCreateEditModal} 
             oficinaParaEditar={oficinaEmEdicao} 
+            users={users}
           />
         </DialogContent>
       </Dialog>
       
+      <Dialog open={assignModalOpen} onClose={handleCloseAssignModal} fullWidth maxWidth="xs">
+        <DialogTitle>Vincular Dono para "{selectedOficina?.nome}"</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel id="select-user-label">Selecione um Usuário</InputLabel>
+            <Select
+              labelId="select-user-label"
+              value={selectedUserId}
+              label="Selecione um Usuário"
+              onChange={(e) => setSelectedUserId(e.target.value)}
+            >
+              <MenuItem value=""><em>Nenhum</em></MenuItem>
+              {users.map(user => (
+                <MenuItem key={user._id} value={user._id}>{user.name} ({user.email})</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseAssignModal}>Cancelar</Button>
+          <Button onClick={handleAssignOwner} variant="contained">Salvar Vínculo</Button>
+        </DialogActions>
+      </Dialog>
+
       {oficinas.length === 0 ? (
         <Typography sx={{ mt: 4, textAlign: 'center' }}>Nenhuma oficina cadastrada ainda.</Typography>
       ) : (
         <Grid container spacing={3} sx={{ mt: 2 }}>
-          {oficinas.map((oficina) => {
-            console.log(`Renderizando card para "${oficina.nome}" com ID: ${oficina._id}`);
-
-            return (
+          {oficinas.map((oficina) => (
             <Grid item xs={12} sm={6} md={4} key={oficina._id}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
+              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <CardContent sx={{ flexGrow: 1 }}>
                   <Typography variant="h6" component="h2" gutterBottom>{oficina.nome}</Typography>
                   <Typography color="text.secondary">CNPJ: {oficina.cnpj}</Typography>
-                  <Typography color="text.secondary" sx={{ mb: 1.5 }}>Telefone: {oficina.telefone}</Typography>
-                  <Typography variant="body2">
-                    {oficina.endereco ? (
-                      <>
-                        {`${oficina.endereco.rua || ''}, ${oficina.endereco.numero || 'S/N'}`}<br />
-                        {`${oficina.endereco.cidade || ''} - ${oficina.endereco.estado || ''}`}
-                      </>
-                    ) : 'Endereço não cadastrado'}
+                  <Typography variant="body2" sx={{ mt: 1, fontWeight: 'bold' }}>
+                    Proprietário: {oficina.proprietario ? oficina.proprietario.name : 'Nenhum'}
                   </Typography>
                 </CardContent>
                 <CardActions>
-                  <Button size="small" onClick={() => handleOpenModalParaEditar(oficina)}>Editar</Button>
-                  <Button  size="small" color="error" onClick={() => handleDeleteOficina(oficina._id)} > Deletar </Button>
+                  <Button size="small" onClick={() => handleOpenEditModal(oficina)}>Editar</Button>
+                  <Button size="small" onClick={() => handleOpenAssignModal(oficina)}>Vincular Dono</Button> 
+                  <Button size="small" color="error" onClick={() => handleDeleteOficina(oficina._id)}>Deletar</Button>
                 </CardActions>
               </Card>
             </Grid>
-          )
-          })}
+          ))}
         </Grid>
       )}
     </Box>

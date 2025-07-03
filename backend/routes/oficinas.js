@@ -21,6 +21,7 @@ router.post(
     check('endereco.cidade', 'A cidade é obrigatória').not().isEmpty(),
     check('endereco.estado', 'O estado é obrigatório').not().isEmpty(),
     check('endereco.cep', 'O CEP é obrigatório').not().isEmpty(),
+    check('proprietario', 'O proprietário é obrigatório').not().isEmpty(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -29,14 +30,14 @@ router.post(
     }
 
     try {
-      const { nome, cnpj, endereco, telefone } = req.body;
+      const { nome, cnpj, endereco, telefone, proprietario } = req.body;
 
       const dadosDaOficina = {
         nome,
         cnpj,
         endereco,
         telefone,
-        proprietario: req.user.id, 
+        proprietario,
       };
       
       const novaOficina = new Oficina(dadosDaOficina);
