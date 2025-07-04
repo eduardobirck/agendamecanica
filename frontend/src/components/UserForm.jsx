@@ -19,9 +19,8 @@ function UserForm({ onSave, onCancel, userToEdit, workshops = [] }) {
       setRole(userToEdit.role || 'user');
       setStatus(userToEdit.status || 'ativo');
       setOficina(userToEdit.oficina?._id || '');
-      setPassword(''); // Senha não é preenchida por segurança
+      setPassword(''); 
     } else {
-      // Limpa o formulário para criação
       setName(''); setEmail(''); setPassword(''); setRole('user'); setStatus('ativo'); setOficina('');
     }
   }, [userToEdit]);
@@ -40,7 +39,7 @@ function UserForm({ onSave, onCancel, userToEdit, workshops = [] }) {
         <Grid item xs={12} sm={6}>
           <TextField fullWidth label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isEditMode} />
         </Grid>
-        {!isEditMode && ( // Só mostra o campo de senha ao criar um novo usuário
+        {!isEditMode && ( 
           <Grid item xs={12}>
             <TextField fullWidth label="Senha" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </Grid>
@@ -65,7 +64,7 @@ function UserForm({ onSave, onCancel, userToEdit, workshops = [] }) {
             </Select>
           </FormControl>
         </Grid>
-        {(role === 'owner' || role === 'funcionario') && ( // Só mostra o vínculo de oficina se o papel for relevante
+        {(role === 'owner' || role === 'funcionario') && ( 
           <Grid item xs={12}>
             <FormControl fullWidth>
               <InputLabel>Vincular à Oficina</InputLabel>
