@@ -6,6 +6,9 @@ function OficinaForm({ onSave, onCancel, oficinaParaEditar, users = [] }) {
   const [cnpj, setCnpj] = useState('');
   const [telefone, setTelefone] = useState('');
   const [endereco, setEndereco] = useState({ rua: '', numero: '', cidade: '', estado: '', cep: '' });
+  const [horarioInicio, setHorarioInicio] = useState('08:00');
+  const [horarioFim, setHorarioFim] = useState('18:00');
+  const [atendimentosSimultaneos, setAtendimentosSimultaneos] = useState(1);
 
   const [proprietarioId, setProprietarioId] = useState('');
 
@@ -16,12 +19,18 @@ function OficinaForm({ onSave, onCancel, oficinaParaEditar, users = [] }) {
       setTelefone(oficinaParaEditar.telefone || '');
       setEndereco(oficinaParaEditar.endereco || { rua: '', numero: '', cidade: '', estado: '', cep: '' });
       setProprietarioId(oficinaParaEditar.proprietario?._id || '');
+      setHorarioInicio(oficinaParaEditar.horarioInicio || '08:00');
+      setHorarioFim(oficinaParaEditar.horarioFim || '18:00');
+      setAtendimentosSimultaneos(oficinaParaEditar.atendimentosSimultaneos || 1);
     } else {
       setNome('');
       setCnpj('');
       setTelefone('');
       setEndereco({ rua: '', numero: '', cidade: '', estado: '', cep: '' });
       setProprietarioId('');
+      setHorarioInicio('08:00');
+      setHorarioFim('18:00');
+      setAtendimentosSimultaneos(1);
     }
   }, [oficinaParaEditar]);
 
@@ -31,7 +40,8 @@ function OficinaForm({ onSave, onCancel, oficinaParaEditar, users = [] }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({ nome, cnpj, telefone, endereco, proprietario: proprietarioId });
+    onSave({ nome, cnpj, telefone, endereco, proprietario: proprietarioId, 
+      horarioInicio, horarioFim, atendimentosSimultaneos});
   };
 
   return (
@@ -78,6 +88,36 @@ function OficinaForm({ onSave, onCancel, oficinaParaEditar, users = [] }) {
         
         <Grid item xs={12}>
             <TextField fullWidth label="Telefone de Contato" value={telefone} onChange={(e) => setTelefone(e.target.value)} required />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Horário de Início"
+            type="time"
+            value={horarioInicio}
+            onChange={(e) => setHorarioInicio(e.target.value)}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Horário de Fim"
+            type="time"
+            value={horarioFim}
+            onChange={(e) => setHorarioFim(e.target.value)}
+            required
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Atendimentos Simultâneos"
+            type="number" 
+            value={atendimentosSimultaneos}
+            onChange={(e) => setAtendimentosSimultaneos(e.target.value)}
+            required
+          />
         </Grid>
       </Grid>
       <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>

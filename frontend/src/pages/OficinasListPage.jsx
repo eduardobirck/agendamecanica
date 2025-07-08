@@ -69,8 +69,8 @@ const handleOpenCreateModal = () => {
         await api.post('/oficinas', dadosDaOficina);
         alert('Oficina salva com sucesso!');
       }
-      handleCloseModal();
-      fetchOficinas();
+      handleCloseCreateEditModal();
+      fetchData(); 
     } catch (err) {
       console.error("Erro ao salvar oficina:", err);
       const errorMessage = err.response?.data?.errors?.[0]?.msg || 'Falha ao salvar oficina.';
@@ -84,7 +84,7 @@ const handleOpenCreateModal = () => {
       try {
         await api.delete(`/oficinas/${id}`);
         alert('Oficina deletada com sucesso');
-        fetchOficinas();
+        fetchData();
       } catch(err) {
         console.error("Erro ao deletar a oficina", err);
         alert('Não foi possível deletar a oficina.');

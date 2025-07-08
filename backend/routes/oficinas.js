@@ -74,9 +74,11 @@ router.get('/', [protect, authorize('admin')], async (req, res) => {
 // @access  Private (Admin)
 router.put('/:id', [protect, authorize('admin')], async (req, res) => {
   try {
-    const {nome, cnpj, endereco, telefone} = req.body;
+    const {nome, cnpj, endereco, telefone, horarioInicio, horarioFim, atendimentosSimultaneos} = req.body;
 
-    const camposAtualizados = {nome, cnpj, endereco, telefone};
+    const camposAtualizados = {nome, cnpj, endereco, telefone, horarioInicio, horarioFim, atendimentosSimultaneos};
+
+    Object.keys(camposAtualizados).forEach(key => camposAtualizados[key] === undefined && delete camposAtualizados[key]);
 
     const oficina = await Oficina.findByIdAndUpdate(
       req.params.id,

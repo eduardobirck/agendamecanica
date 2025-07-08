@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/api';
-import UserForm from '../components/UserForm'; // Importe o novo formulário
+import UserForm from '../components/UserForm'; 
 
 import { Box, Typography, CircularProgress, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Button, Dialog, DialogTitle, DialogContent, IconButton, TextField, DialogActions } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit'; 
@@ -20,7 +20,6 @@ function UserManagementPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      // Busca usuários e oficinas ao mesmo tempo
       const [usersRes, workshopsRes] = await Promise.all([
         api.get('/users'),
         api.get('/oficinas/public')

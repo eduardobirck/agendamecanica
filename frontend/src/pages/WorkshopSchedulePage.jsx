@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/api';
-import { useAuth } from '../context/AuthContext';
 
 // Nossos componentes reutilizáveis!
 import AgendamentoForm from '../components/AgendamentoForm';
 import ListaAgendamentos from '../components/ListaAgendamentos';
 
-import { Box, Typography, CircularProgress, Alert, Button } from '@mui/material';
+import { Box, Typography, CircularProgress, Alert, Button, TextField, Paper } from '@mui/material';
 
 function WorkshopSchedulePage() {
   const { oficinaId } = useParams();
@@ -18,6 +17,10 @@ function WorkshopSchedulePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [agendamentoEmEdicao, setAgendamentoEmEdicao] = useState(null);
+
+  const [selectedDate, setSelectedDate] = useState('');
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [isFetchingSlots, setIsFetchingSlots] = useState(false);
 
   const fetchAgendamentos = useCallback(async () => {
     try {
@@ -30,50 +33,79 @@ function WorkshopSchedulePage() {
   }, [oficinaId]);
 
   useEffect(() => {
-    const getInitialData = async () => {
-      setLoading(true);
+    const getOficinaDetails = async () => {
       try {
         const oficinaResponse = await api.get(`/oficinas/${oficinaId}`);
         setOficina(oficinaResponse.data);
-
-        await fetchAgendamentos();
       } catch (err) {
-        setError('Oficina não encontrada ou erro ao carregar dados.');
+        setError('Oficina não encontrada.');
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-    getInitialData();
-  }, [oficinaId, fetchAgendamentos]);
+    getOficinaDetails();
+  }, [oficinaId]);
+
+  // useEffect para buscar os horários disponíveis QUANDO A DATA MUDA
+  useEffect(() => {
+    if (selectedDate) {
+      const fetchAvailableSlots = async () => {
+        setIsFetchingSlots(true);
+        setAvailableSlots([]); // Limpa os slots antigos
+        try {
+          const response = await api.get(`/agendamentos/disponibilidade?oficinaId=${oficinaId}&data=${selectedDate}`);
+          setAvailableSlots(response.data);
+        } catch (err) {
+          console.error("Erro ao buscar horários:", err);
+          alert("Não foi possível buscar os horários para esta data.");
+        } finally {
+          setIsFetchingSlots(false);
+        }
+      };
+      fetchAvailableSlots();
+    }
+  }, [selectedDate, oficinaId]);
+  
+  // useEffect para buscar os agendamentos existentes QUANDO A DATA MUDA
+  useEffect(() => {
+    if (selectedDate) {
+      const fetchAgendamentos = async () => {
+        try {
+          const response = await api.get(`/agendamentos?oficinaId=${oficinaId}&data=${selectedDate}`);
+          setAgendamentos(response.data);
+        } catch (err) {
+          console.error("Erro ao buscar agendamentos:", err);
+        }
+      };
+      fetchAgendamentos();
+    }
+  }, [selectedDate, oficinaId]);
 
   const handleSave = async (dadosDoForm) => {
-    const dadosParaSalvar = { ...dadosDoForm, oficina: oficinaId };
-
+    // Adiciona a data e o ID da oficina aos dados
+    const dadosParaSalvar = { ...dadosDoForm, data: selectedDate, oficina: oficinaId };
     try {
-      if (agendamentoEmEdicao) {
-        await api.put(`/agendamentos/${agendamentoEmEdicao._id}`, dadosParaSalvar);
-        alert('Agendamento atualizado com sucesso!');
-      } else {
-        await api.post('/agendamentos', dadosParaSalvar);
-        alert('Agendamento criado com sucesso!');
-      }
-      setAgendamentoEmEdicao(null);
-      fetchAgendamentos(); // Atualiza a lista
+      await api.post('/agendamentos', dadosParaSalvar);
+      alert('Agendamento criado com sucesso!');
+
+      setSelectedDate('');
+      setAvailableSlots([]);
+      setAgendamentos([]);
     } catch (err) {
       alert('Erro ao salvar o agendamento.');
       console.error(err);
     }
   };
 
-  const handleDelete = async (id) => { /* ... (a lógica de deletar pode ser adicionada aqui depois) ... */ };
+  const handleDelete = async (id) => {  };
   const handleEdit = (agendamento) => setAgendamentoEmEdicao(agendamento);
   const handleCancelEdit = () => setAgendamentoEmEdicao(null);
 
   if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
   if (error) return <Alert severity="error">{error}</Alert>;
 
-  return (
+ return (
     <Box>
       <Button onClick={() => navigate('/oficinas-disponiveis')} sx={{ mb: 2 }}>
         &larr; Voltar para a lista de oficinas
@@ -83,19 +115,30 @@ function WorkshopSchedulePage() {
         Faça seu agendamento
       </Typography>
 
-      <AgendamentoForm 
-        onSave={handleSave} 
-        agendamentoParaEditar={agendamentoEmEdicao} 
-        onCancelEdit={handleCancelEdit} 
-      />
-      
-      <hr style={{ margin: '2rem 0' }} />
+      <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
+        <Typography variant="h6">1. Escolha uma data</Typography>
+        <TextField
+          fullWidth
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          sx={{ mt: 2 }}
+        />
+      </Paper>
 
-      <ListaAgendamentos 
-        agendamentos={agendamentos} 
-        onEdit={handleEdit} 
-        onDelete={handleDelete}
-      />
+      {selectedDate && (
+        <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>2. Preencha seus dados e escolha um horário</Typography>
+          {isFetchingSlots ? (
+            <CircularProgress />
+          ) : (
+            <AgendamentoForm 
+              onSave={handleSave} 
+              availableSlots={availableSlots} 
+            />
+          )}
+        </Paper>
+      )}
     </Box>
   );
 }
