@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/api';
 import OficinaForm from '../components/OficinaForm';
+import { Link as RouterLink } from 'react-router-dom';
 
 import { 
   Box, Card, CardActions, CardContent, CircularProgress, Typography, 
@@ -182,6 +183,7 @@ const handleOpenCreateModal = () => {
                 <CardActions>
                   <Button size="small" onClick={() => handleOpenEditModal(oficina)}>Editar</Button>
                   <Button size="small" onClick={() => handleOpenAssignModal(oficina)}>Vincular Dono</Button> 
+                  <Button size="small" component={RouterLink} to={`/oficina/${oficina._id}/servicos`}>Serviços</Button>
                   <Button size="small" color="error" onClick={() => handleDeleteOficina(oficina._id)}>Deletar</Button>
                 </CardActions>
               </Card>

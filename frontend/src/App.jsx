@@ -12,6 +12,7 @@ import OficinasListPage from './pages/OficinasListPage';
 import WorkshopSelectionPage from './pages/WorkshopSelectionPage';
 import WorkshopSchedulePage from './pages/WorkshopSchedulePage';
 import UserManagementPage from './pages/UserManagementPage';
+import ServiceManagementPage from './pages/ServiceManagementPage';
 
 // Componente PrivateRoute (sem alterações)
 function PrivateRoute({ children }) {
@@ -36,7 +37,10 @@ function App() {
                 path="/oficinas" 
                 element={<PrivateRoute><OficinasListPage /></PrivateRoute>} 
            />
-
+          <Route 
+           path="/oficina/:oficinaId/servicos" 
+            element={<PrivateRoute><ServiceManagementPage /></PrivateRoute>} 
+          />
           <Route
             path="/oficinas-disponiveis"
             element={<PrivateRoute><WorkshopSelectionPage/></PrivateRoute>}

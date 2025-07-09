@@ -26,6 +26,8 @@ app.use('/api/agendamentos', require('./routes/agendamentos'));
 
 app.use('/api/users', require('./routes/users'));
 
+app.use('/api/servicos', require('./routes/servicos'));
+
 app.listen(port, () => {
   console.log(`🚀 Servidor backend rodando em http://localhost:${port}`);
 });
