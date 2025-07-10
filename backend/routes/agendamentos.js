@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect } = require('../middleware/authMiddleware'); 
 const Agendamento = require('../models/Agendamento');
 const Oficina = require('../models/Oficina');
+const Servico = require('../models/Servico');
 
 // @route   POST /api/agendamentos
 // @desc    Criar um novo agendamento para uma oficina específica
@@ -61,7 +62,8 @@ router.get('/', protect, async (req, res) => {
     }
 
     const agendamentos = await Agendamento.find(filtro)
-      .populate('oficina', 'nome') 
+      .populate('oficina', 'nome')
+      .populate('servico', 'nome duracao') 
       .sort({ data: 1, hora: 1 });
 
     res.json(agendamentos);
@@ -73,63 +75,117 @@ router.get('/', protect, async (req, res) => {
 });
 
 // @route   GET /api/agendamentos/disponibilidade
-// @desc    Verificar horários disponíveis para uma oficina em uma data específica
-// @access  Private (Qualquer usuário logado)
+// @desc    Verificar horários disponíveis com base na duração do serviço
+// @access  Private
 router.get('/disponibilidade', protect, async (req, res) => {
-  const { oficinaId, data } = req.query;
+  // Agora recebemos também o ID do serviço
+  const { oficinaId, data, servicoId } = req.query;
 
-  if (!oficinaId || !data) {
-    return res.status(400).json({ msg: 'ID da oficina e data são obrigatórios.' });
+  if (!oficinaId || !data || !servicoId) {
+    return res.status(400).json({ msg: 'ID da oficina, data e serviço são obrigatórios.' });
   }
 
   try {
-    // 1. Buscar os detalhes da oficina para obter os horários e a capacidade
-    const oficina = await Oficina.findById(oficinaId);
-    if (!oficina) {
-      return res.status(404).json({ msg: 'Oficina não encontrada.' });
+    // 1. Buscar detalhes da oficina E do serviço selecionado
+    const [oficina, servico] = await Promise.all([
+      Oficina.findById(oficinaId),
+      Servico.findById(servicoId)
+    ]);
+
+    if (!oficina || !servico) {
+      return res.status(404).json({ msg: 'Oficina ou Serviço não encontrado.' });
     }
 
-    // 2. Buscar TODOS os agendamentos já existentes para essa oficina e data
+    // 2. Buscar agendamentos existentes para o dia
     const dataSelecionada = new Date(data);
     const inicioDoDia = new Date(dataSelecionada.setUTCHours(0, 0, 0, 0));
     const fimDoDia = new Date(dataSelecionada.setUTCHours(23, 59, 59, 999));
     
     const agendamentosExistentes = await Agendamento.find({
       oficina: oficinaId,
-      data: {
-        $gte: inicioDoDia,
-        $lte: fimDoDia,
-      },
-    });
+      data: { $gte: inicioDoDia, $lte: fimDoDia },
+    }).populate('servico', 'duracao'); // Traz a duração dos serviços já agendados
 
-    // 3. Gerar todos os possíveis horários de atendimento do dia
-    const { horarioInicio, horarioFim, atendimentosSimultaneos } = oficina;
-    const [inicioHora, inicioMinuto] = horarioInicio.split(':').map(Number);
-    const [fimHora, fimMinuto] = horarioFim.split(':').map(Number);
+    // 3. Gerar todos os possíveis horários de início (slots) do dia
+    // Usaremos incrementos de 15 minutos para maior flexibilidade
+    const { horarioInicio, horarioFim } = oficina;
+    const duracaoServicoAtual = servico.duracao;
+    const slotsDisponiveis = [];
     
-    const todosOsHorarios = [];
-    for (let hora = inicioHora; hora < fimHora; hora++) {
-      // Por enquanto, estamos considerando apenas slots de 1 hora.
-      const horario = `${String(hora).padStart(2, '0')}:00`;
-      todosOsHorarios.push(horario);
+    let horaAtual = new Date(`${data}T${horarioInicio}:00.000Z`);
+    const horaFim = new Date(`${data}T${horarioFim}:00.000Z`);
+
+    while (horaAtual < horaFim) {
+      const horarioSlot = horaAtual.toISOString();
+      const fimSlot = new Date(horaAtual.getTime() + duracaoServicoAtual * 60000);
+
+      // O slot só é válido se o serviço terminar dentro do horário de funcionamento
+      if (fimSlot > horaFim) {
+        break; 
+      }
+
+      // 4. Verificar conflitos com agendamentos existentes
+      let temConflito = false;
+      for (const agendamento of agendamentosExistentes) {
+        const inicioAgendado = new Date(agendamento.data);
+        // Precisamos da duração do serviço JÁ agendado
+        const duracaoAgendada = agendamento.servico ? agendamento.servico.duracao : 60; // Duração padrão se não tiver serviço
+        const fimAgendado = new Date(inicioAgendado.getTime() + duracaoAgendada * 60000);
+
+        // Verifica se o novo slot se sobrepõe a um agendamento existente
+        // Conflito: (InicioA < FimB) e (FimA > InicioB)
+        if (horaAtual < fimAgendado && fimSlot > inicioAgendado) {
+          temConflito = true;
+          break;
+        }
+      }
+
+      if (!temConflito) {
+        // Formata para "HH:MM" para enviar ao frontend
+        slotsDisponiveis.push(horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }));
+      }
+
+      // Avança para o próximo slot de 15 minutos
+      horaAtual = new Date(horaAtual.getTime() + 15 * 60000);
     }
-    
-    // 4. Calcular a ocupação de cada horário
-    const contagemDeAgendamentos = {};
-    agendamentosExistentes.forEach(ag => {
-      contagemDeAgendamentos[ag.hora] = (contagemDeAgendamentos[ag.hora] || 0) + 1;
-    });
 
-    // 5. Filtrar e retornar apenas os horários que ainda têm vagas
-    const horariosDisponiveis = todosOsHorarios.filter(horario => {
-      const agendadosNesseHorario = contagemDeAgendamentos[horario] || 0;
-      return agendadosNesseHorario < atendimentosSimultaneos;
-    });
-
-    res.json(horariosDisponiveis);
+    // 5. Por enquanto, a lógica de atendimentos simultâneos foi simplificada.
+    // Esta lógica acima considera capacidade = 1. Podemos refatorar depois se necessário.
+    res.json(slotsDisponiveis);
 
   } catch (error) {
     console.error(error);
+    res.status(500).send('Erro no servidor');
+  }
+});
+
+// @route   DELETE /api/agendamentos/:id
+// @desc    Deleta um agendamento
+// @access  Private (Admin ou Dono da Oficina)
+router.delete('/:id', protect, async (req, res) => {
+  try {
+    const agendamento = await Agendamento.findById(req.params.id);
+
+    if (!agendamento) {
+      return res.status(404).json({ msg: 'Agendamento não encontrado' });
+    }
+
+    // Lógica de permissão: Garante que apenas um admin ou o dono/funcionário da oficina possa deletar.
+    const eDonoDaOficina = req.user.oficina?.toString() === agendamento.oficina?.toString();
+
+    if (req.user.role !== 'admin' && !eDonoDaOficina) {
+      return res.status(403).json({ msg: 'Usuário não autorizado a deletar este agendamento' });
+    }
+
+    await agendamento.deleteOne();
+
+    res.json({ msg: 'Agendamento removido com sucesso' });
+
+  } catch (error) {
+    console.error(error.message);
+    if (error.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'Agendamento não encontrado' });
+    }
     res.status(500).send('Erro no servidor');
   }
 });

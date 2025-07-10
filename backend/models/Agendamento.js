@@ -10,7 +10,11 @@ const AgendamentoSchema = new mongoose.Schema({
   data: { type: Date, required: true },
   hora: { type: String, required: true },
   nomeCliente: { type: String, required: true },
-  servico: { type: String, required: true },
+  servico: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Servico',
+    required: true,
+  },
   veiculo: String,
   placa: { type: String, required: true },
   telefone: String
