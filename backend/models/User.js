@@ -10,6 +10,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Por favor, forneça um email'],
     unique: true, 
+    lowercas: true,
     match: [
       /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
       'Por favor, forneça um email válido',
