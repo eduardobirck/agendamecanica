@@ -18,7 +18,7 @@ return (
             <li key={ag._id} style={{ border: '1px solid #ccc', padding: '16px', marginBottom: '16px', borderRadius: '8px' }}>
               <strong>{new Date(ag.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} às {ag.hora}</strong> - {ag.nomeCliente} ({ag.veiculo} / {ag.placa})
               <br />
-              Serviço: {ag.servico}
+              Serviço: {ag.servico?.nome}
               
               {/* 2. Usando o Stack para alinhar e espaçar os botões */}
               <Stack direction="row" spacing={1} sx={{ marginTop: '10px' }}>
