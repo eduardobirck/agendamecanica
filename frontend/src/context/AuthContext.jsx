@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios'; 
 import { jwtDecode } from 'jwt-decode';
+import api from '../api/api';
 
 const AuthContext = createContext(null);
 
@@ -21,10 +21,6 @@ export const AuthProvider = ({ children }) => {
       }
     }
   }, [token]);
-
-  const api = axios.create({
-    baseURL: 'http://localhost:3001/api',
-  });
 
   const login = async (email, password) => {
     try {
