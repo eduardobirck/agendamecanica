@@ -10,7 +10,11 @@ const swaggerDocument = require('./config/swagger');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Middlewares
-app.use(cors());
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173', 
+};
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 // --- ROTAS DA API ---

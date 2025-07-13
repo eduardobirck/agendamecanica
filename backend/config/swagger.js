@@ -11,9 +11,7 @@ const swaggerDocument = {
       description: 'Servidor de Desenvolvimento',
     },
   ],
-  // ===================================================================
   // TAGS - Agrupadores de Rotas
-  // ===================================================================
   tags: [
     { name: 'Autenticação', description: 'Rotas de registro e login' },
     { name: 'Oficinas', description: 'Operações para visualizar e gerenciar oficinas' },
@@ -21,9 +19,7 @@ const swaggerDocument = {
     { name: 'Agendamentos', description: 'Operações para criar e visualizar agendamentos' },
     { name: 'Usuários (Admin)', description: 'Operações de administração de usuários' },
   ],
-  // ===================================================================
   // COMPONENTS - Schemas e Segurança
-  // ===================================================================
   components: {
     securitySchemes: {
       bearerAuth: {
@@ -68,12 +64,9 @@ const swaggerDocument = {
           endereco: { type: 'object', properties: { rua: { type: 'string' }, cidade: { type: 'string' }, estado: { type: 'string' }, cep: { type: 'string' }}},
         },
       },
-      // Adicione mais Schemas conforme necessário...
     },
   },
-  // ===================================================================
   // PATHS - Definição de cada Rota da API
-  // ===================================================================
   paths: {
     // --- Rotas de Autenticação ---
     '/api/auth/register': {
