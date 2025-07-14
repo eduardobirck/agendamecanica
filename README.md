@@ -65,5 +65,5 @@ Para executar este projeto localmente, siga os passos abaixo.
 ### **1. Clonar o Repositório**
 
 ```bash
-git clone https://[URL_DO_SEU_REPOSITORIO_AQUI].git
+git clone https://github.com/eduardobirck/agendamecanica.git
 cd nome-da-pasta-do-projeto
