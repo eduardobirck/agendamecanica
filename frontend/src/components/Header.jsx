@@ -18,34 +18,38 @@ function Header() {
     navigate('/login'); 
   };
 
-  return (
+   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
+          {/* O Título da Aplicação */}
           <Typography 
             variant="h6" 
             component={RouterLink} 
-            to="/" 
+            to={isAuthenticated ? (user?.role === 'admin' ? '/' : '/oficinas-disponiveis') : '/login'}
             sx={{ flexGrow: 1, color: 'inherit', textDecoration: 'none' }}
           >
             Agenda da Oficina
           </Typography>
 
-          {isAuthenticated ? (
+          {/* Renderização Condicional dos Botões */}
+          {isAuthenticated && (
             <>
-              <Button color="inherit" component={RouterLink} to="/">Agendamentos</Button>
-              {user && user.role === 'admin' && (<>
-                <Button color="inherit" component={RouterLink} to="/oficinas">
-                  Oficinas
-                </Button>
-                <Button color="inherit" component={RouterLink} to="/admin/users">Usuários</Button>
-              </>)}              
+              {user?.role === 'admin' ? (
+                // ================== MENU DO ADMIN ==================
+                <>
+                  <Button color="inherit" component={RouterLink} to="/">Dashboard</Button>
+                  <Button color="inherit" component={RouterLink} to="/oficinas">Oficinas</Button>
+                  <Button color="inherit" component={RouterLink} to="/admin/users">Usuários</Button>
+                </>
+              ) : (
+                // ================== MENU DO CLIENTE ==================
+                <>
+                  <Button color="inherit" component={RouterLink} to="/oficinas-disponiveis">Agendar Serviço</Button>
+                  <Button color="inherit" component={RouterLink} to="/meus-agendamentos">Meus Agendamentos</Button>
+                </>
+              )}
               <Button color="inherit" onClick={handleLogout}>Sair</Button>
-            </>
-          ) : (
-            <>
-              <Button color="inherit" component={RouterLink} to="/login">Login</Button>
-              <Button color="inherit" component={RouterLink} to="/register">Registrar</Button>
             </>
           )}
         </Toolbar>

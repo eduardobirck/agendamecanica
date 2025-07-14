@@ -4,12 +4,12 @@ const { protect } = require('../middleware/authMiddleware');
 const Agendamento = require('../models/Agendamento');
 const Oficina = require('../models/Oficina');
 const Servico = require('../models/Servico');
+const User = require('../models/User');
 
 // @route   POST /api/agendamentos
 // @desc    Criar um novo agendamento para uma oficina específica
 // @access  Private (Qualquer usuário logado)
 router.post('/', protect, async (req, res) => {
-  // Garanta que esta linha esteja exatamente assim, incluindo 'oficina' no final
   const { data, hora, nomeCliente, servico, veiculo, placa, telefone, oficina } = req.body;
 
   try {
@@ -23,7 +23,7 @@ router.post('/', protect, async (req, res) => {
     }
 
     const novoAgendamento = new Agendamento({
-      oficina, // Forma curta de 'oficina: oficina'
+      oficina, 
       data,
       hora,
       nomeCliente,
@@ -31,6 +31,7 @@ router.post('/', protect, async (req, res) => {
       veiculo,
       placa,
       telefone,
+      cliente: req.user.id,
     });
 
     const agendamentoSalvo = await novoAgendamento.save();
@@ -78,7 +79,6 @@ router.get('/', protect, async (req, res) => {
 // @desc    Verificar horários disponíveis com base na duração do serviço
 // @access  Private
 router.get('/disponibilidade', protect, async (req, res) => {
-  // Agora recebemos também o ID do serviço
   const { oficinaId, data, servicoId } = req.query;
 
   if (!oficinaId || !data || !servicoId) {
@@ -107,7 +107,6 @@ router.get('/disponibilidade', protect, async (req, res) => {
     }).populate('servico', 'duracao'); // Traz a duração dos serviços já agendados
 
     // 3. Gerar todos os possíveis horários de início (slots) do dia
-    // Usaremos incrementos de 15 minutos para maior flexibilidade
     const { horarioInicio, horarioFim } = oficina;
     const duracaoServicoAtual = servico.duracao;
     const slotsDisponiveis = [];
@@ -186,6 +185,23 @@ router.delete('/:id', protect, async (req, res) => {
     if (error.kind === 'ObjectId') {
       return res.status(404).json({ msg: 'Agendamento não encontrado' });
     }
+    res.status(500).send('Erro no servidor');
+  }
+});
+
+// @route   GET /api/agendamentos/meus
+// @desc    Busca os agendamentos do usuário logado
+// @access  Private
+router.get('/meus', protect, async (req, res) => {
+  try {
+    const agendamentos = await Agendamento.find({ cliente: req.user.id })
+      .populate('oficina', 'nome')
+      .populate('servico', 'nome duracao')
+      .sort({ data: -1 });
+
+    res.json(agendamentos);
+  } catch (error) {
+    console.error(error.message);
     res.status(500).send('Erro no servidor');
   }
 });

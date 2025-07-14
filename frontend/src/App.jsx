@@ -13,6 +13,7 @@ import WorkshopSelectionPage from './pages/WorkshopSelectionPage';
 import WorkshopSchedulePage from './pages/WorkshopSchedulePage';
 import UserManagementPage from './pages/UserManagementPage';
 import ServiceManagementPage from './pages/ServiceManagementPage';
+import MeusAgendamentos from './pages/MeusAgendamentos';
 
 // Componente PrivateRoute (sem alterações)
 function PrivateRoute({ children }) {
@@ -53,6 +54,10 @@ function App() {
             path="/admin/users" 
             element={<PrivateRoute><UserManagementPage /></PrivateRoute>} 
           />
+          <Route 
+        path="/meus-agendamentos" 
+        element={<PrivateRoute><MeusAgendamentos /></PrivateRoute>} 
+      />
         </Routes>
       </Container>
     </Router>
